@@ -58,6 +58,13 @@ impl Vec3 {
     {
         self / self.length()
     }
+    pub fn to_rgb(&self) -> [u8; 3]
+    {
+        let ir = (255.999 * self.e[0]) as u8;
+        let ig = (255.999 * self.e[1]) as u8;
+        let ib = (255.999 * self.e[2]) as u8;
+        [ir, ig, ib]
+    }
 }
 
 impl Neg for Vec3 {
@@ -274,3 +281,4 @@ mod tests
         assert_eq!(-u, Vec3::new(-1., -2., -3.));
     }
 }
+
