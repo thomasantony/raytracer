@@ -1,6 +1,7 @@
 
 use std::ops::*;
-#[derive(Debug)]
+
+#[derive(Debug, Clone, Copy)]
 pub struct Vec3
 {
     e: [f64; 3]
@@ -58,6 +59,7 @@ impl Vec3 {
         self / self.length()
     }
 }
+
 impl Neg for &Vec3 {
     type Output = Vec3;
     fn neg(self) -> Vec3 {
