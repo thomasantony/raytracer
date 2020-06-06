@@ -1,5 +1,6 @@
 use image::{ImageBuffer};
-use raytracer::{Color, Vec3};
+use raytracer::{Color, Ray};
+
 
 fn main() {
     let image_width = 256;
@@ -20,7 +21,7 @@ fn main() {
         }
     }
     println!("");
-    im.save("./output.png").unwrap();
+    im.save("./01_output.png").unwrap();
 }
 
 

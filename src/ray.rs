@@ -1,19 +1,19 @@
 use crate::{Point3, Vec3};
 #[derive(Debug, Default)]
 pub struct Ray {
-    origin: Point3,
-    dir: Vec3,
+    pub origin: Point3,
+    pub direction: Vec3,
 }
 impl Ray 
 {
-    pub fn new(origin: &Point3, dir: &Vec3) -> Self {
+    pub fn new(origin: Point3, direction: Vec3) -> Self {
         Self {
             origin: origin.clone(),
-            dir: dir.clone(),
+            direction: direction.clone(),
         }
     }
     pub fn at(&self, t: f64) -> Point3 {
-        self.origin + self.dir * t
+        self.origin + self.direction * t
     }
 }
 
