@@ -1,7 +1,8 @@
 use image::{ImageBuffer};
+use raytracer::Vec3;
 
 fn main() {
-    println!("Hello, world!");
+    let a = Vec3::default();
     let image_width = 256;
     let image_height = 256;
 
@@ -26,3 +27,5 @@ fn main() {
     println!("");
     im.save("./output.png").unwrap();
 }
+
+
