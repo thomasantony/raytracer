@@ -4,8 +4,7 @@ pub struct Ray {
     pub origin: Point3,
     pub direction: Vec3,
 }
-impl Ray 
-{
+impl Ray {
     pub fn new(origin: Point3, direction: Vec3) -> Self {
         Self {
             origin: origin.clone(),
@@ -18,12 +17,10 @@ impl Ray
 }
 
 #[cfg(test)]
-mod tests 
-{
+mod tests {
     use super::*;
     #[test]
-    fn test_at()
-    {
+    fn test_at() {
         let origin = Point3::new(0., 0., 0.);
         let dir = Vec3::new(1., 1., 1.);
         let ray = Ray::new(origin, dir);
