@@ -26,7 +26,7 @@ mod tests
     {
         let origin = Point3::new(0., 0., 0.);
         let dir = Vec3::new(1., 1., 1.);
-        let ray = Ray::new(&origin, &dir);
+        let ray = Ray::new(origin, dir);
         assert_eq!(ray.at(5.), Point3::new(5., 5., 5.));
     }
 }
