@@ -11,7 +11,10 @@ pub fn clamp(n: f64, min: f64, max: f64) -> f64 {
     }
 }
 
-pub fn rand_unit_vector() -> Vec3 {
+pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+    return v - 2.0 * n * v.dot(n);
+}
+pub fn random_unit_vector() -> Vec3 {
     let mut rng = thread_rng();
     let a: f64 = rng.gen_range(0., 2. * std::f64::consts::PI);
     let z: f64 = rng.gen_range(-1., 1.);
@@ -21,8 +24,8 @@ pub fn rand_unit_vector() -> Vec3 {
 
 
 pub fn rand_in_hemisphere(normal: &Vec3) -> Vec3 {
-    let in_unit_sphere = rand_unit_vector();
-    if in_unit_sphere.dot(normal) > 0.0
+    let in_unit_sphere = random_unit_vector();
+    if in_unit_sphere.dot(*normal) > 0.0
     { // In the same hemisphere as the normal
         return in_unit_sphere;
     }else{

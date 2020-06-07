@@ -29,8 +29,8 @@ fn main() {
         origin - horizontal / 2. - vertical / 2. - Vec3::new(0., 0., focal_length);
 
     let mut world = HittableList::new();
-    world.add(SimpleSphere::new(point3(0., 0., -1.), 0.5));
-    world.add(SimpleSphere::new(point3(0., -100.5, -1.), 100.));
+    world.add(Box::new(SimpleSphere::new(point3(0., 0., -1.), 0.5)));
+    world.add(Box::new(SimpleSphere::new(point3(0., -100.5, -1.), 100.)));
 
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {} ", j);

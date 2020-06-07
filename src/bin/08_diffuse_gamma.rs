@@ -1,7 +1,7 @@
 use image::ImageBuffer;
 use rand::prelude::*;
 use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, SimpleSphere,
-                rand_unit_vector};
+                random_unit_vector};
 
 fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
@@ -11,7 +11,7 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     }
     if let Some(rec) = world.hit(r, 0.001, std::f64::INFINITY) 
     {
-        let target = rec.point + rec.normal + rand_unit_vector();
+        let target = rec.point + rec.normal + random_unit_vector();
         let random_ray = Ray::new(rec.point, target - rec.point);
         // Cut intensity in half with every reflection
         return 0.5 * ray_color(&random_ray, world, depth-1);
@@ -34,8 +34,8 @@ fn main() {
 
     let camera = Camera::new();
     let mut world = HittableList::new();
-    world.add(SimpleSphere::new(point3(0., 0., -1.), 0.5));
-    world.add(SimpleSphere::new(point3(0., -100.5, -1.), 100.));
+    world.add(Box::new(SimpleSphere::new(point3(0., 0., -1.), 0.5)));
+    world.add(Box::new(SimpleSphere::new(point3(0., -100.5, -1.), 100.)));
 
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {} ", j);

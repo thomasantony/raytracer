@@ -1,7 +1,7 @@
 use image::ImageBuffer;
 use rand::prelude::*;
-use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, SimpleSphere,
-                random_unit_vector};
+use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, Sphere};
+use raytracer::materials::{Lambertian, Metal};
 
 fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
@@ -9,12 +9,13 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     {
         return color(0., 0., 0.);
     }
-    if let Some(rec) = world.hit(r, 0., std::f64::INFINITY) 
+    if let Some(rec) = world.hit(r, 0.001, std::f64::INFINITY) 
     {
-        let target = rec.point + rec.normal + random_unit_vector();
-        let random_ray = Ray::new(rec.point, target - rec.point);
-        // Cut intensity in half with every reflection
-        return 0.5 * ray_color(&random_ray, world, depth-1);
+        if let Some((scattered_ray, attenuation)) = rec.scatter(r)
+        {
+            return attenuation * ray_color(&scattered_ray, world, depth -1);
+        }
+        return color(0., 0., 0.);
     }
     let unit_direction = r.direction.unit();
     // Convert y-component (-1 to 1) to blue color
@@ -34,8 +35,19 @@ fn main() {
 
     let camera = Camera::new();
     let mut world = HittableList::new();
-    world.add(Box::new(SimpleSphere::new(point3(0., 0., -1.), 0.5)));
-    world.add(Box::new(SimpleSphere::new(point3(0., -100.5, -1.), 100.)));
+    
+    use std::rc::Rc;
+    let material_1 = Rc::new(Lambertian{albedo: color(0.7, 0.3, 0.3)});
+    let material_2 = Rc::new(Lambertian{albedo: color(0.8, 0.8, 0.0)});
+
+    let metal_1 = Rc::new(Metal{albedo: color(0.8, 0.6, 0.2)});
+    let metal_2 = Rc::new(Metal{albedo: color(0.8, 0.8, 0.8)});
+
+    world.add(Box::new(Sphere::new(point3(0., 0., -1.), 0.5, material_1.clone())));
+    world.add(Box::new(Sphere::new(point3(0., -100.5, -1.), 100., material_2.clone())));
+
+    world.add(Box::new(Sphere::new(point3(1.,0.,-1.), 0.5, metal_1.clone())));
+    world.add(Box::new(Sphere::new(point3(-1.,0.,-1.), 0.5, metal_2.clone())));
 
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {} ", j);
@@ -47,10 +59,10 @@ fn main() {
                 let r = camera.get_ray(u, v);
                 pixel_color += ray_color(&r, &world, max_depth);
             }
-            let pixel = image::Rgb(pixel_color.to_rgb_scaled(samples_per_pixel));
+            let pixel = image::Rgb(pixel_color.to_rgb_scaled_gamma2(samples_per_pixel));
             im.put_pixel(i, image_height - j - 1, pixel);
         }
     }
     println!("");
-    im.save("./07_output.png").unwrap();
+    im.save("./09_output.png").unwrap();
 }

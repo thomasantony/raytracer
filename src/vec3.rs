@@ -25,10 +25,10 @@ impl Vec3 {
     pub fn length_squared(&self) -> f64 {
         self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
     }
-    pub fn dot(&self, rhs: &Vec3) -> f64 {
+    pub fn dot(&self, rhs: Vec3) -> f64 {
         self.e[0] * rhs.e[0] + self.e[1] * rhs.e[1] + self.e[2] * rhs.e[2]
     }
-    pub fn cross(&self, rhs: &Vec3) -> Vec3 {
+    pub fn cross(&self, rhs: Vec3) -> Vec3 {
         Vec3::new(
             self.e[1] * rhs.e[2] - self.e[2] * rhs.e[1],
             self.e[2] * rhs.e[0] - self.e[0] * rhs.e[2],
@@ -177,6 +177,13 @@ impl Mul<Vec3> for f64 {
         rhs * self
     }
 }
+impl Mul<&Vec3> for f64 {
+    type Output = Vec3;
+    fn mul(self, rhs: &Vec3) -> Vec3 {
+        rhs * self
+    }
+}
+
 impl Div<f64> for Vec3 {
     type Output = Vec3;
     fn div(self, rhs: f64) -> Vec3 {
@@ -243,7 +250,7 @@ mod tests {
     fn test_vec3_dot() {
         let u = Vec3::new(1., 2., 3.);
         let v = Vec3::new(4., 5., 6.);
-        assert_eq!(u.dot(&v), 32.0);
+        assert_eq!(u.dot(v), 32.0);
     }
     #[test]
     fn test_vec3_cross() {

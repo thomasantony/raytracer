@@ -4,7 +4,7 @@ use raytracer::{color, point3, Color, Point3, Ray, Vec3};
 fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> Option<f64> {
     let oc = r.origin - *center;
     let a = r.direction.length_squared();
-    let half_b = oc.dot(&r.direction);
+    let half_b = oc.dot(r.direction);
     let c = oc.length_squared() - radius * radius;
     let discriminant = half_b * half_b - a * c;
 
