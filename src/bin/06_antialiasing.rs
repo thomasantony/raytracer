@@ -1,6 +1,6 @@
 use image::ImageBuffer;
 use rand::prelude::*;
-use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, Sphere};
+use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, SimpleSphere};
 
 fn ray_color(r: &Ray, world: &HittableList) -> Color {
     if let Some(rec) = world.hit(r, 0., std::f64::INFINITY) {
@@ -23,8 +23,8 @@ fn main() {
 
     let camera = Camera::new();
     let mut world = HittableList::new();
-    world.add(Sphere::new(point3(0., 0., -1.), 0.5));
-    world.add(Sphere::new(point3(0., -100.5, -1.), 100.));
+    world.add(SimpleSphere::new(point3(0., 0., -1.), 0.5));
+    world.add(SimpleSphere::new(point3(0., -100.5, -1.), 100.));
 
     for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {} ", j);

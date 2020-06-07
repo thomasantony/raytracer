@@ -1,14 +1,14 @@
 use crate::{HitRecord, Hittable, Point3, Ray};
-pub struct Sphere {
+pub struct SimpleSphere {
     center: Point3,
     radius: f64,
 }
-impl Sphere {
+impl SimpleSphere {
     pub fn new(center: Point3, radius: f64) -> Self {
         Self { center, radius }
     }
 }
-impl Hittable for Sphere {
+impl Hittable for SimpleSphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc = r.origin - self.center;
         let a = r.direction.length_squared();
