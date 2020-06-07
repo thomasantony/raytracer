@@ -1,5 +1,6 @@
 
 use std::ops::*;
+use crate::clamp;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Vec3
@@ -57,6 +58,18 @@ impl Vec3 {
         let ib = (255.999 * self.e[2]) as u8;
         [ir, ig, ib]
     }
+    pub fn to_rgb_scaled(&self, samples_per_pixel: i32) -> [u8; 3]
+    {
+        // Divide the color total by the number of samples.
+        let scale = 1.0f64 / samples_per_pixel as f64;
+        let r = self.e[0] * scale;
+        let g = self.e[1] * scale;
+        let b = self.e[2] * scale;
+        let ir = (256f64 * clamp(r,0., 0.999)) as u8;
+        let ig = (256f64 * clamp(g,0., 0.999)) as u8;
+        let ib = (256f64 * clamp(b,0., 0.999)) as u8;
+        [ir, ig, ib]
+    }
 }
 
 impl Neg for Vec3 {
@@ -96,7 +109,7 @@ impl Add for Vec3
     }
 }
 
-impl Add<&Self> for &Vec3 
+impl Add<&Self> for Vec3 
 {
     type Output = Vec3;
     fn add(self, rhs: &Self) -> Vec3
@@ -180,13 +193,23 @@ impl Div<f64> for &Vec3
     }
 }
 
-impl AddAssign<&Self> for Vec3 
+impl AddAssign for Vec3 
 {
-    fn add_assign(&mut self, rhs: &Self)
+    fn add_assign(&mut self, rhs: Self)
     {
         self.e[0] += rhs.e[0];
         self.e[1] += rhs.e[1];
         self.e[2] += rhs.e[2];
+    }
+}
+
+impl SubAssign for Vec3 
+{
+    fn sub_assign(&mut self, rhs: Self)
+    {
+        self.e[0] -= rhs.e[0];
+        self.e[1] -= rhs.e[1];
+        self.e[2] -= rhs.e[2];
     }
 }
 
