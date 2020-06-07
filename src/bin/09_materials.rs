@@ -37,11 +37,11 @@ fn main() {
     let mut world = HittableList::new();
     
     use std::rc::Rc;
-    let material_1 = Rc::new(Lambertian{albedo: color(0.7, 0.3, 0.3)});
-    let material_2 = Rc::new(Lambertian{albedo: color(0.8, 0.8, 0.0)});
+    let material_1 = Rc::new(Lambertian::new(color(0.7, 0.3, 0.3)));
+    let material_2 = Rc::new(Lambertian::new(color(0.8, 0.8, 0.0)));
 
-    let metal_1 = Rc::new(Metal{albedo: color(0.8, 0.6, 0.2)});
-    let metal_2 = Rc::new(Metal{albedo: color(0.8, 0.8, 0.8)});
+    let metal_1 = Rc::new(Metal::new(color(0.8, 0.6, 0.2), 0.5));
+    let metal_2 = Rc::new(Metal::new(color(0.8, 0.8, 0.8), 0.3));
 
     world.add(Box::new(Sphere::new(point3(0., 0., -1.), 0.5, material_1.clone())));
     world.add(Box::new(Sphere::new(point3(0., -100.5, -1.), 100., material_2.clone())));
