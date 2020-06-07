@@ -4,16 +4,17 @@ use raytracer::{Color, color, Point3, point3, Vec3, Ray};
 fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> Option<f64>
 {
     let oc = r.origin - *center;
-    let a = r.direction.dot(&r.direction);
-    let b = 2.0 * oc.dot(&r.direction);
-    let c = oc.dot(&oc) - radius*radius;
-    let discriminant = b*b - 4.0 * a*c;
+    let a = r.direction.length_squared();
+    let half_b = oc.dot(&r.direction);
+    let c = oc.length_squared() - radius*radius;
+    let discriminant = half_b*half_b - a*c;
+
     // No intersection
     if discriminant <= 0. {
         return None;
     } else {
         // This is distance to the sphere along the ray for near side point
-        let position = (-b - discriminant.sqrt() ) / (2.0*a);
+        let position = (-half_b - discriminant.sqrt() ) / (2.0*a);
         return Some(position);
     }
 }
