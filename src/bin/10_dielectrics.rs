@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use image::ImageBuffer;
 use rand::prelude::*;
 use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, Sphere};
@@ -37,13 +37,13 @@ fn main() {
     let camera = Camera::default();
     let mut world = HittableList::new();
     
-    let material_1 = Rc::new(Lambertian::new(color(0.1, 0.2, 0.5)));
-    let material_2 = Rc::new(Lambertian::new(color(0.8, 0.8, 0.0)));
+    let material_1 = Arc::new(Lambertian::new(color(0.1, 0.2, 0.5)));
+    let material_2 = Arc::new(Lambertian::new(color(0.8, 0.8, 0.0)));
 
-    let metal_1 = Rc::new(Metal::new(color(0.8, 0.6, 0.2), 0.5));
-    // let metal_2 = Rc::new(Metal::new(color(0.8, 0.8, 0.8), 0.3));
+    let metal_1 = Arc::new(Metal::new(color(0.8, 0.6, 0.2), 0.5));
+    // let metal_2 = Arc::new(Metal::new(color(0.8, 0.8, 0.8), 0.3));
 
-    let dielectric_1 = Rc::new(Dielectric::new(1.5));
+    let dielectric_1 = Arc::new(Dielectric::new(1.5));
     world.add(Box::new(Sphere::new(point3(0., 0., -1.), 0.5, material_1.clone())));
     world.add(Box::new(Sphere::new(point3(0., -100.5, -1.), 100., material_2.clone())));
 

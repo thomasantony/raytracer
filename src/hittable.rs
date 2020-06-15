@@ -1,12 +1,12 @@
 use crate::{Point3, Ray, Vec3, Material, Color};
 use std::ops::{Deref, DerefMut};
-use std::rc::Rc;
+use std::sync::Arc;
 pub struct HitRecord {
     pub point: Point3,
     pub normal: Vec3,
     pub distance: f64,
     pub is_front_face: bool,
-    pub material: Option<Rc<dyn Material>>,
+    pub material: Option<Arc<dyn Material + Sync + Send>>,
 }
 
 impl HitRecord {
@@ -29,7 +29,7 @@ impl HitRecord {
                              ray: &Ray, 
                              distance: f64, 
                              point: Point3, 
-                             material: Rc<dyn Material>) -> Self
+                             material: Arc<dyn Material + Sync + Send>) -> Self
     {
         let mut rec = Self::new(outward_normal, ray, distance, point);
         rec.material = Some(material);
@@ -45,12 +45,12 @@ pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
-pub struct HittableList(Vec<Box<dyn Hittable>>);
+pub struct HittableList(Vec<Box<dyn Hittable + Sync + Send>>);
 impl HittableList {
     pub fn new() -> Self {
         Self(Vec::new())
     }
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Box<dyn Hittable + Sync + Send>) {
         self.0.push(object);
     }
 }
@@ -70,7 +70,7 @@ impl Hittable for HittableList {
 
 // Allow use of HittableList like a vector
 impl Deref for HittableList {
-    type Target = Vec<Box<dyn Hittable>>;
+    type Target = Vec<Box<dyn Hittable + Sync + Send>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0

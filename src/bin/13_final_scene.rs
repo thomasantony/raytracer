@@ -1,14 +1,14 @@
-use std::rc::Rc;
+use std::sync::Arc;
 use rand::prelude::*;
 use raytracer::{color, point3, Vec3, Camera, Color, HittableList, Sphere};
 use raytracer::materials::{Material, Lambertian, Metal, Dielectric};
-use raytracer::renderers::{Renderer, SimpleRenderer};
+use raytracer::renderers::{Renderer, SimpleRenderer, RayonRenderer};
 
 fn random_scene() -> HittableList {
     let mut rng = thread_rng();
     let mut world = HittableList::new();
     
-    let ground_material = Rc::new(Lambertian::new(color(0.5, 0.5, 0.5)));
+    let ground_material = Arc::new(Lambertian::new(color(0.5, 0.5, 0.5)));
     world.add(Box::new(Sphere::new(point3(0., -1e3, 0.), 1000., ground_material.clone())));
 
     for a in -11 .. 11
@@ -20,18 +20,18 @@ fn random_scene() -> HittableList {
                                 0.2, 
                                 b as f64 + 0.9*rng.gen::<f64>());
             if (center - point3(4., 0.2, 0.)).length() > 0.9 {
-                let sphere_material : Rc<dyn Material> = if choose_mat < 0.8 {
+                let sphere_material : Arc<dyn Material + Sync + Send> = if choose_mat < 0.8 {
                     // diffuse
                     let albedo = Color::random() * Color::random();
-                    Rc::new(Lambertian::new(albedo))
+                    Arc::new(Lambertian::new(albedo))
                 } else if choose_mat < 0.95 {
                     // metal
                     let albedo = Color::random_range(0.5, 1.);
                     let fuzz = rng.gen_range(0., 0.5);
-                    Rc::new(Metal::new(albedo, fuzz))
+                    Arc::new(Metal::new(albedo, fuzz))
                 } else {
                     // glass
-                    Rc::new(Dielectric::new(1.5))
+                    Arc::new(Dielectric::new(1.5))
                 };
                 world.add(Box::new(Sphere::new(center, 0.2, sphere_material)));
             }
@@ -39,17 +39,19 @@ fn random_scene() -> HittableList {
         }
     }
 
-    let material_1 = Rc::new(Dielectric::new(1.5));
+    let material_1 = Arc::new(Dielectric::new(1.5));
     world.add(Box::new(Sphere::new(point3(0., 1., 0.), 1.0, material_1)));
 
-    let material_2 = Rc::new(Lambertian::new(color(0.4, 0.2, 0.1)));
+    let material_2 = Arc::new(Lambertian::new(color(0.4, 0.2, 0.1)));
     world.add(Box::new(Sphere::new(point3(-4., 1., 0.), 1.0, material_2)));
 
-    let material_3 = Rc::new(Metal::new(color(0.7, 0.6, 0.5), 0.0));
+    let material_3 = Arc::new(Metal::new(color(0.7, 0.6, 0.5), 0.0));
     world.add(Box::new(Sphere::new(point3(4., 1., 0.), 1.0, material_3)));
     
     world
 }
+
+use std::env;
 fn main() {
     // Define world
     let world = random_scene();
@@ -76,8 +78,16 @@ fn main() {
                                                  aperture, 
                                                  dist_to_focus);
 
-    let renderer = SimpleRenderer::default();
-    let im = renderer.render(&world, &camera, image_width, image_height, samples_per_pixel, max_depth);
+    let mut args = std::env::args();
+    let im = if args.len() > 1 && args.nth(1) == Some("s".into())
+    {
+        let renderer = SimpleRenderer::default();
+        renderer.render(world, &camera, image_width, image_height, samples_per_pixel, max_depth)
+    }else{
+        let renderer = RayonRenderer::default();
+        renderer.render(world, &camera, image_width, image_height, samples_per_pixel, max_depth)
+    };
+    
     println!("");
     im.save("./13_output.png").unwrap();
 }

@@ -1,6 +1,8 @@
 use rand::prelude::*;
 use image::RgbImage;
 use crate::{Camera, HittableList, color, Color, Ray, Hittable};
+use indicatif::ParallelProgressIterator;
+use indicatif::{ProgressBar, ProgressStyle};
 
 fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
     // If we've exceeded the ray bounce limit, no more light is gathered.
@@ -25,7 +27,7 @@ fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
 pub trait Renderer 
 {
     fn render(&self,
-                scene: &HittableList, 
+                scene: HittableList, 
                 camera: &Camera,                   
                 image_width: u32, 
                 image_height: u32,
@@ -38,7 +40,7 @@ pub struct SimpleRenderer{}
 
 impl Renderer for SimpleRenderer {
     fn render(&self,
-                scene: &HittableList, 
+                scene: HittableList, 
               camera: &Camera,     
               image_width: u32, 
               image_height: u32,
@@ -47,6 +49,9 @@ impl Renderer for SimpleRenderer {
     {
         let mut rng = thread_rng();
         let mut im = RgbImage::new(image_width, image_height);
+        let pb = indicatif::ProgressBar::new((image_width*image_height).into());
+        pb.set_style(ProgressStyle::default_bar()
+                     .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})"));
         for j in (0..image_height).rev() {
         eprint!("\rScanlines remaining: {} ", j);
         for i in 0..image_width {
@@ -59,8 +64,80 @@ impl Renderer for SimpleRenderer {
             }
             let pixel = image::Rgb(pixel_color.to_rgb_scaled_gamma2(samples_per_pixel));
             im.put_pixel(i, image_height - j - 1, pixel);
+            pb.inc(1);
         }
         }
+        pb.finish_with_message("done");
+        im
+    }
+}
+
+use std::sync::{Arc};
+use std::sync::mpsc;
+use rayon::prelude::*;
+use std::thread;
+
+#[derive(Default)]
+pub struct RayonRenderer{}
+
+impl Renderer for RayonRenderer {
+    fn render(&self,
+              scene: HittableList, 
+              camera: &Camera,     
+              image_width: u32, 
+              image_height: u32,
+              samples_per_pixel: i32,
+              max_depth: i32) -> RgbImage
+    {
+        let (tx, rx) = mpsc::channel();
+        // Collects and writes pixels to image buffer
+        let writer_thread = thread::spawn(move || {
+            let mut im = RgbImage::new(image_width, image_height);
+            loop {
+                // Type: Option<(u32, u32, Color)>
+                let next_pixel = rx.recv().unwrap();
+                if let Some((x, y, p)) = next_pixel
+                {
+                    im.put_pixel(x, y, p)
+                }else{
+                    break;
+                }
+            }
+            im
+        });
+
+        let scene = Arc::new(scene);
+        // let mut im = RgbImage::new(image_width, image_height);
+        let n_pixels = image_width * image_height;
+        let pb = indicatif::ProgressBar::new(n_pixels.into());
+        pb.set_style(ProgressStyle::default_bar()
+                     .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})"));
+        let tx2 = tx.clone();
+        // Column major form
+        // pixel_idx = i * image_height + j
+        (0..n_pixels)
+            .into_par_iter()
+            .progress_with(pb)
+            .map_with(scene, |scene, pixel_idx| {
+                let mut rng = thread_rng();
+                let j = image_height - (pixel_idx % image_height) - 1;
+                let i = (pixel_idx as f64 / image_height as f64).floor() as u32;
+                let mut pixel_color = color(0., 0., 0.);
+                for _ in 0..samples_per_pixel {
+                    let u = ((i as f64) + rng.gen::<f64>()) / (image_width as f64 - 1.0);
+                    let v = ((j as f64) + rng.gen::<f64>()) / (image_height as f64 - 1.0);
+                    let r = camera.get_ray(u, v);
+                    pixel_color += ray_color(&r, &scene, max_depth);
+                }
+                let pixel = image::Rgb(pixel_color.to_rgb_scaled_gamma2(samples_per_pixel));
+                // im.put_pixel(i, image_height - j - 1, pixel);
+                return Some((i, image_height - j - 1, pixel));
+            }).try_for_each_with(tx, |tx, item| {
+                tx.send(item)
+            }).unwrap();
+        tx2.send(None).unwrap();
+
+        let im = writer_thread.join().unwrap();
         im
     }
 }
