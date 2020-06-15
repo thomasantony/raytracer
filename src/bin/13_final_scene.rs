@@ -60,8 +60,12 @@ struct Opt {
     parallel: bool,
 
     /// Set image width
-    #[structopt(short = "w", long = "velocity", default_value = "384")]
+    #[structopt(short = "w", long = "image-width", default_value = "384")]
     image_width: u32,
+
+    /// Set samples per pixel
+    #[structopt(short = "s", long = "samples", default_value = "100")]
+    samples: u32,
 }
 
 fn main() {
@@ -74,7 +78,7 @@ fn main() {
     let aspect_ratio = 16. / 9.;
     let image_width = opt.image_width;
     let image_height = (image_width as f32 / aspect_ratio as f32) as u32;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = opt.samples as i32;
     let max_depth = 50;
 
     let lookfrom = point3(13., 2., 3.);
