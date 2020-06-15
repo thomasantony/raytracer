@@ -21,7 +21,7 @@ fn main() {
     let samples_per_pixel = 100;
     let mut im = ImageBuffer::new(image_width, image_height);
 
-    let camera = Camera::new();
+    let camera = Camera::default();
     let mut world = HittableList::new();
     world.add(Box::new(SimpleSphere::new(point3(0., 0., -1.), 0.5)));
     world.add(Box::new(SimpleSphere::new(point3(0., -100.5, -1.), 100.)));

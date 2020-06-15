@@ -7,7 +7,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new() -> Self {
+    pub fn default() -> Self {
         let aspect_ratio = 16. / 9.;
         let viewport_height = 2.0;
         let viewport_width = aspect_ratio * viewport_height;
@@ -18,6 +18,33 @@ impl Camera {
         let vertical = Vec3::new(0., viewport_height, 0.);
         let lower_left_corner =
             origin - horizontal / 2. - vertical / 2. - Vec3::new(0., 0., focal_length);
+
+        Self {
+            origin,
+            lower_left_corner,
+            horizontal,
+            vertical,
+        }
+    }
+    pub fn new(look_from: Point3,
+               look_at: Point3,
+               vup: Vec3,
+               vfov_deg: f64, 
+               aspect_ratio: f64) -> Self {
+        let vfov = vfov_deg.to_radians();
+        let h = (vfov/2.).tan();
+        let viewport_height = 2.0 * h;
+        let viewport_width = aspect_ratio * viewport_height;
+
+        let w = (look_from - look_at).unit();
+        let u = vup.cross(w).unit();
+        let v = w.cross(u);
+
+        let origin = look_from;
+        let horizontal = viewport_width * u;
+        let vertical = viewport_height * v;
+        let lower_left_corner =
+            origin - horizontal / 2. - vertical / 2. - w;
 
         Self {
             origin,

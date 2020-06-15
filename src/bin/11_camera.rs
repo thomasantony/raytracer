@@ -1,6 +1,6 @@
 use image::ImageBuffer;
 use rand::prelude::*;
-use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, Sphere};
+use raytracer::{color, point3, Vec3, Camera, Color, Hittable, HittableList, Ray, Sphere};
 use raytracer::materials::{Lambertian, Metal, Dielectric};
 
 fn ray_color(r: &Ray, world: &HittableList, depth: i32) -> Color {
@@ -33,7 +33,23 @@ fn main() {
 
     let mut im = ImageBuffer::new(image_width, image_height);
 
-    let camera = Camera::default();
+    let vup = Vec3::new(0., 1., 0.);
+    // let camera = Camera::new(
+    //                 point3(-2., 2., 1.),
+    //                 point3(0., 0., -1.),
+    //                 vup,
+    //                 90., 
+    //                 aspect_ratio,
+    //             );
+
+    let camera = Camera::new(
+                point3(-2., 2., 1.), 
+                point3(0., 0., -1.), 
+                vup, 
+                20., 
+                aspect_ratio);
+
+
     let mut world = HittableList::new();
     
     use std::rc::Rc;
@@ -67,5 +83,5 @@ fn main() {
         }
     }
     println!("");
-    im.save("./10_output.png").unwrap();
+    im.save("./11_output.png").unwrap();
 }

@@ -33,7 +33,7 @@ fn main() {
 
     let mut im = ImageBuffer::new(image_width, image_height);
 
-    let camera = Camera::new();
+    let camera = Camera::default();
     let mut world = HittableList::new();
     
     use std::rc::Rc;
