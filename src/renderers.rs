@@ -53,7 +53,7 @@ impl Renderer for SimpleRenderer {
         pb.set_style(ProgressStyle::default_bar()
                      .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})"));
         for j in (0..image_height).rev() {
-        eprint!("\rScanlines remaining: {} ", j);
+        // eprint!("\rScanlines remaining: {} ", j);
         for i in 0..image_width {
             let mut pixel_color = color(0., 0., 0.);
             for _ in 0..samples_per_pixel {

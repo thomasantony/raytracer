@@ -51,14 +51,28 @@ fn random_scene() -> HittableList {
     world
 }
 
-use std::env;
+use structopt::StructOpt;
+#[derive(Debug, StructOpt)]
+#[structopt(name = "13_final_scene", about = "Final scene.")]
+struct Opt {
+    /// Use parallel renderer
+    #[structopt(short = "p", long)]
+    parallel: bool,
+
+    /// Set image width
+    #[structopt(short = "w", long = "velocity", default_value = "384")]
+    image_width: u32,
+}
+
 fn main() {
+    let opt = Opt::from_args();
+
     // Define world
     let world = random_scene();
 
     // Render
     let aspect_ratio = 16. / 9.;
-    let image_width = 384;
+    let image_width = opt.image_width;
     let image_height = (image_width as f32 / aspect_ratio as f32) as u32;
     let samples_per_pixel = 100;
     let max_depth = 50;
@@ -78,8 +92,7 @@ fn main() {
                                                  aperture, 
                                                  dist_to_focus);
 
-    let mut args = std::env::args();
-    let im = if args.len() > 1 && args.nth(1) == Some("s".into())
+    let im = if !opt.parallel
     {
         let renderer = SimpleRenderer::default();
         renderer.render(world, &camera, image_width, image_height, samples_per_pixel, max_depth)
