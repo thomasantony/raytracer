@@ -1,4 +1,7 @@
-use crate::{Ray, HitRecord, Color, random_unit_vector, reflect, clamp};
+use crate::{Ray, HitRecord, Color, random_unit_vector};
+use crate::utils::{reflect, refract, schlick, clamp, fmin};
+use rand::prelude::*;
+
 pub trait Material {
     /**
      * Returns a ray if there is a scattered ray
@@ -47,5 +50,51 @@ impl Material for Metal {
         }else{
             None
         }
+    }
+}
+
+pub struct Dielectric {
+    ref_idx: f64,
+}
+impl Dielectric {
+    pub fn new(ref_idx: f64) -> Self {
+        Self {
+            ref_idx
+        }
+    }
+}
+impl Material for Dielectric {
+    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)>
+    {
+        let attenuation = Color::new(1.0, 1.0, 1.0);
+
+        let etai_over_etat = if rec.is_front_face {
+            1.0 / self.ref_idx
+        }else {
+            self.ref_idx
+        };
+        let ray_unit = r_in.direction.unit();
+        let cos_theta = fmin(-ray_unit.dot(rec.normal), 1.0);
+        let sin_theta = (1.0 - cos_theta*cos_theta).sqrt();
+        // Total Internal Reflection
+        if etai_over_etat * sin_theta > 1.0 
+        {
+            let reflected = reflect(ray_unit, rec.normal);
+            let scattered = Ray::new(rec.point, reflected);
+            return Some((scattered, attenuation))
+        }
+        // Glancing Reflection
+        let reflect_prob = schlick(cos_theta, etai_over_etat);
+        let mut rng = thread_rng();
+        if rng.gen::<f64>() < reflect_prob
+        {
+            let reflected = reflect(ray_unit, rec.normal);
+            let scattered = Ray::new(rec.point, reflected);
+            return Some((scattered, attenuation))
+        }
+        // Refraction
+        let refracted = refract(ray_unit, rec.normal, etai_over_etat);
+        let scattered = Ray::new(rec.point, refracted);
+        Some((scattered, attenuation))
     }
 }
