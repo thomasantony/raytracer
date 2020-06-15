@@ -1,5 +1,5 @@
 use image::ImageBuffer;
-use raytracer::{Color, Ray};
+use raytracer::{Color};
 
 fn main() {
     let image_width = 256;

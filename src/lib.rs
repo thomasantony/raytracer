@@ -5,7 +5,7 @@ mod ray;
 mod sphere;
 mod utils;
 mod vec3;
-
+pub mod renderers;
 
 pub use vec3::Vec3;
 pub type Point3 = Vec3;
