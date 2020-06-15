@@ -1,5 +1,6 @@
 use crate::clamp;
 use std::ops::*;
+use rand::prelude::*;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Vec3 {
@@ -65,6 +66,22 @@ impl Vec3 {
         let ig = (256f64 * clamp(g, 0., 0.999)) as u8;
         let ib = (256f64 * clamp(b, 0., 0.999)) as u8;
         [ir, ig, ib]
+    }
+    pub fn random() -> Self {
+        let mut rng = thread_rng();
+        Self
+        {
+            e: [rng.gen(), rng.gen(), rng.gen()]
+        }
+    }
+    pub fn random_range(min: f64, max: f64) -> Self {
+        let mut rng = thread_rng();
+        Self
+        {
+            e: [rng.gen_range(min, max),
+                rng.gen_range(min, max),
+                rng.gen_range(min, max)]
+        }
     }
 }
 

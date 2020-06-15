@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use image::ImageBuffer;
 use rand::prelude::*;
 use raytracer::{color, point3, Camera, Color, Hittable, HittableList, Ray, Sphere};
@@ -36,7 +37,6 @@ fn main() {
     let camera = Camera::default();
     let mut world = HittableList::new();
     
-    use std::rc::Rc;
     let material_1 = Rc::new(Lambertian::new(color(0.7, 0.3, 0.3)));
     let material_2 = Rc::new(Lambertian::new(color(0.8, 0.8, 0.0)));
 

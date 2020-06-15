@@ -56,3 +56,11 @@ pub fn rand_in_hemisphere(normal: &Vec3) -> Vec3 {
         return -in_unit_sphere;
     }
 }
+
+pub fn random_in_unit_disk() -> Vec3
+{
+    let mut rng = thread_rng();
+    let r = rng.gen::<f64>();   // 0 - 1
+    let theta = rng.gen_range(0., 2.0 * std::f64::consts::PI);
+    return Vec3::new( r * theta.cos(), r * theta.sin(), 0.);
+}
