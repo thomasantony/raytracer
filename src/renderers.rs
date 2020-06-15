@@ -111,7 +111,7 @@ impl Renderer for RayonRenderer {
         let n_pixels = image_width * image_height;
         let pb = indicatif::ProgressBar::new(n_pixels.into());
         pb.set_style(ProgressStyle::default_bar()
-                     .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})"));
+                     .template("{spinner:.green} [{bar:40.cyan/blue}] {percent}% ({elapsed_precise}/{eta_precise})"));
         let tx2 = tx.clone();
         // Column major form
         // pixel_idx = i * image_height + j
