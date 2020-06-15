@@ -119,16 +119,17 @@ impl Renderer for RayonRenderer {
             .into_par_iter()
             .progress_with(pb)
             .map_with(scene, |scene, pixel_idx| {
-                let mut rng = thread_rng();
                 let j = image_height - (pixel_idx % image_height) - 1;
                 let i = (pixel_idx as f64 / image_height as f64).floor() as u32;
-                let mut pixel_color = color(0., 0., 0.);
-                for _ in 0..samples_per_pixel {
-                    let u = ((i as f64) + rng.gen::<f64>()) / (image_width as f64 - 1.0);
-                    let v = ((j as f64) + rng.gen::<f64>()) / (image_height as f64 - 1.0);
-                    let r = camera.get_ray(u, v);
-                    pixel_color += ray_color(&r, &scene, max_depth);
-                }
+                let pixel_color: Color = (0..samples_per_pixel)
+                    .into_par_iter()
+                    .map(|_| {
+                        let mut rng = thread_rng();
+                        let u = ((i as f64) + rng.gen::<f64>()) / (image_width as f64 - 1.0);
+                        let v = ((j as f64) + rng.gen::<f64>()) / (image_height as f64 - 1.0);
+                        let r = camera.get_ray(u, v);
+                        ray_color(&r, &scene, max_depth)
+                    }).reduce(Color::default, |p, c| p + c);
                 let pixel = image::Rgb(pixel_color.to_rgb_scaled_gamma2(samples_per_pixel));
                 // im.put_pixel(i, image_height - j - 1, pixel);
                 return Some((i, image_height - j - 1, pixel));
